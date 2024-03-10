@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1710036501848,
+      "tag": "0000_optimal_fat_cobra",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710040903044,
+      "tag": "0001_special_psylocke",
+      "breakpoints": true
+    }
+  ]
+}
