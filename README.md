@@ -12,7 +12,7 @@
 ### Cloning the repository
 
 ```shell
-git clone https://github.com/aungpyaephyo1412/express-ts-template.git
+git clone https://github.com/aungpyaephyo1412/express-ts-postgresql.git
 ```
 
 ### Install packages
