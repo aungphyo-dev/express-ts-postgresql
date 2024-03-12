@@ -8,6 +8,7 @@ import logger from 'morgan';
 import router from './routes';
 import 'dotenv/config';
 import { apiVersion, client } from './utils';
+import helmet from 'helmet';
 
 const app: Application = express();
 
@@ -16,6 +17,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(helmet())
 app.use(logger('dev'));
 app.use(compression());
 app.use(cookieParser());
