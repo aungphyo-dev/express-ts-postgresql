@@ -1,16 +1,5 @@
 import { Request, Response } from 'express';
-import { pgDatabase } from '../utils';
-import { users } from '../models/user.service';
-import { asc, desc, eq } from 'drizzle-orm';
-
-const ReturnObject = {
-  id: users.id,
-  email: users.email,
-  username: users.username,
-  name: users.name,
-  created_at: users.created_at,
-  updated_at: users.updated_at,
-};
+import { prisma } from '../utils';
 export class UsersController {
   constructor() {
     this.index = this.index.bind(this);
@@ -20,15 +9,25 @@ export class UsersController {
   }
   async index(req: Request, res: Response) {
     try {
-      const { offset = 0, limit = 20, sort = 'asc' } = req.query;
-      const data = await pgDatabase
-        .select(ReturnObject)
-        .from(users)
-        .offset(+offset)
-        .limit(+limit)
-        .orderBy(sort === 'desc' ? desc(users.id) : asc(users.id));
+      const { page = 1, pageSize = 20, sort = 'asc' } = req.query;
+      const totalCounts = await prisma.user.count()
+      const data = await prisma.user.findMany({
+        skip : (+page - 1) * +pageSize,
+        take : +pageSize,
+        orderBy : [{id : sort === "asc" ? "asc" : "desc"}],
+        select :{
+          password : false,
+          id : true,
+          name : true,
+          username : true,
+          email : true,
+          updatedAt : true,
+          createdAt : true
+        }
+      })
       return res.status(200).json({
         message: 'Users retrieve successfully!',
+        totalCounts,
         data,
       });
     } catch (error) {
@@ -39,11 +38,11 @@ export class UsersController {
 
   async show(req: Request, res: Response) {
     const { id } = req.params;
-    const [data] = await pgDatabase
-      .select(ReturnObject)
-      .from(users)
-      .where(eq(users.id, +id))
-      .execute();
+    const data = await prisma.user.findUnique({
+      where : {
+        id : +id
+      }
+    });
     if (!data) return res.status(404).json({ error: 'User not found!' });
     return res.status(200).json({
       message: 'User retrieve successfully!',
@@ -56,23 +55,30 @@ export class UsersController {
     if (!req.body) {
       return res.status(400).json({ error: 'Body Required!' });
     }
-    const [data] = await pgDatabase
-      .update(users)
-      .set({ ...req.body, updated_at: new Date() })
-      .where(eq(users.id, +id))
-      .returning(ReturnObject);
-    if (!data) return res.status(400).json({ error: 'Something went wrong!' });
-    return res.status(200).json({ message: 'Update user successfully!', data });
+    try{
+      await prisma.user.update({
+        where : { id : +id},
+        data : req.body
+      })
+      return res.status(200).json({ message: 'Update user successfully!'});
+    }catch (e) {
+      console.log(e);
+      return res.status(400).json({ error: 'Something went wrong!' });
+    }
   }
 
   async delete(req: Request, res: Response) {
     const { id } = req.params;
-    const [deletedUser] = await pgDatabase
-      .delete(users)
-      .where(eq(users.id, +id))
-      .returning();
-    if (!deletedUser)
+    try{
+      await prisma.user.delete({
+        where : {
+          id : +id
+        }
+      })
+      return res.sendStatus(204)
+    }catch (e) {
+      console.log(e);
       return res.status(400).json({ error: 'Something went wrong!' });
-    return res.status(204).json({});
+    }
   }
 }
