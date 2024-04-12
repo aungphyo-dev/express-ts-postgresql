@@ -7,7 +7,7 @@ import compression from 'compression';
 import logger from 'morgan';
 import router from './routes';
 import 'dotenv/config';
-import { apiVersion, client } from './utils';
+import { apiVersion } from './utils';
 import helmet from 'helmet';
 
 const app: Application = express();
@@ -29,7 +29,6 @@ const server = http.createServer(app);
 const port = process.env['PORT'] || '3000';
 server.listen(port, async () => {
   try {
-    await client.connect();
     console.log(`Server running on http://localhost:${port} ✨`);
     console.log(
       `Default api route is http://localhost:${port}/api/${apiVersion()} 🌏`

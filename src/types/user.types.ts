@@ -7,10 +7,10 @@ export const createUserSchema = z.object({
   name: z.string().min(1),
 });
 export const loginUserSchema = z.object({
-  identifier: z.string().min(1),
+  email: z.string().min(1),
   password: z.string().min(6),
 });
-
+export type loginUserType = z.infer<typeof loginUserSchema>
 export const updateUserSchema = z.object({
   username: z.string().optional(),
   email: z.string().email().optional(),
